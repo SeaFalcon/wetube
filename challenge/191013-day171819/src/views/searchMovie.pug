@@ -1,0 +1,8 @@
+include layouts/main
+
+block content
+  h1 Filtering by #{pageTitle}
+
+  each movie in movies
+    a(href=movie.id)
+      p= movie.title

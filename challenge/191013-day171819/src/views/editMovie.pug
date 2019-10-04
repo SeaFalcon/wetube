@@ -1,0 +1,12 @@
+include layouts/main
+
+block content
+  h1 Editing #{pageTitle}
+  form(action=`/${movie.id}/edit`, method="post")
+    input(type="text", name="title", placeholder="Title", value=movie.title, required=true, minlength=3)
+    input(type="number", name="year", placeholder="Year", value=movie.year, required=true)
+    input(type="number", name="rating", placeholder="Rating", value=movie.rating, required=true)
+    textarea(name="synopsis", placeholder="Synopsis", required=true)= movie.synopsis
+    input(type="text", name="genres", placeholder="Genres", value= movie.genres.join(), required=true)
+    input(type="submit", value="Submit") 
+  a(href=`/${movie.id}/delete`) Delete Movie

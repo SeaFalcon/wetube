@@ -1,6 +1,7 @@
 extends layouts/main 
 
 block content
+  //- #{video}
   .form-container
     form(action=routes.editVideo(video.id), method="post")
       input(type="text", id="Title", name="title", required=true, value=video.title)

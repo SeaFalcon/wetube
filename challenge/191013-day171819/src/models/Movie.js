@@ -7,10 +7,19 @@ SO YOU CAN SEARCH / ADD / EDIT / DELETE YOUR DOCUMENTS ONLY.
 PLEASE FOLLOW THIS STEP
 WE NEED TO SHARE THE SAME DB SO NICO CAN CHECK OUT EVERYBODYS PROJECT.
 */
-const YOUR_USERNAME = null;
+const YOUR_USERNAME = null || "SeaFalcon";
 
 const MovieSchema = mongoose.Schema({
   // HERE YOU HAVE TO CREATE AND COMPLETE THE MOVIE SCHEMA
+  title: String,
+  year: Number,
+  rating: Number,
+  synopsis: String,
+  genres: Array,
+  uploadedAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 if (YOUR_USERNAME === null || typeof YOUR_USERNAME !== "string") {
