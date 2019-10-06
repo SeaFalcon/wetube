@@ -1,0 +1,12 @@
+include layouts/main
+include mixins/movieBlock
+
+block content
+  each movie in movies
+    a(href=`/${movie.id}`)
+      +movieBlock({
+        id: movie.id,
+        title: movie.title,
+        synopsis: movie.synopsis,
+        genres: movie.genres
+      })

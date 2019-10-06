@@ -9,6 +9,7 @@ export const home = async (req, res) => {
   // await 부분이 끝날때까지 아랫줄이 실행되지 않는 것 보장
   try {
     const videos = await Video.find({}).sort({ _id: -1 });
+    console.log(videos);
     res.render("Home", { pageTitle: "Home", videos });
   } catch (err) {
     console.log(err);
@@ -58,7 +59,7 @@ export const videoDetail = async (req, res) => {
     const video = await Video.findOne({ _id: id });
     res.render("videoDetail", { pageTitle: video.title, video });
   } catch (err) {
-    // console.error(err);
+    console.error(err);
     res.redirect(routes.home);
   }
 };
@@ -82,13 +83,13 @@ export const postEditVideo = async (req, res) => {
   } = req;
 
   try {
-    await Video.findOneAndUpdate({ _id: id }, body);
+    await Video.findOneAndUpdate({ _id: id }, body, (err, doc) => {
+      console.log(doc);
+    });
     res.redirect(routes.videoDetail(id));
   } catch (err) {
     res.redirect(routes.home);
   }
-
-  res.render("editVideo", { pageTitle: "Edit Video" });
 };
 
 export const deleteVideo = async (req, res) => {
@@ -98,6 +99,8 @@ export const deleteVideo = async (req, res) => {
 
   try {
     await Video.findOneAndRemove({ _id: id });
-  } catch (err) {}
+  } catch (err) {
+    console.log(err);
+  }
   res.redirect(routes.home);
 };
