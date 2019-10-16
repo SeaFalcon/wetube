@@ -46,9 +46,12 @@ export const postUpload = async (req, res) => {
   const newVideo = await Video.create({
     fileUrl: path,
     title,
-    description
+    description,
+    creator: req.user.id
   });
   console.log(newVideo);
+  req.user.videos.push(newVideo.id);
+  req.user.save();
   res.redirect(routes.videoDetail(newVideo.id));
 };
 
@@ -56,7 +59,9 @@ export const videoDetail = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const video = await Video.findOne({ _id: id });
+    // populate 함수는 스키마 속성이 ObjectId인 경우에만 사용 가능
+    // 원래 videos는 creator의 id 값만을 가지고 있으나, populate 함수를 사용하면 해당 필드에 유저 객체를 넣어준다.
+    const video = await Video.findOne({ _id: id }).populate("creator");
     res.render("videoDetail", { pageTitle: video.title, video });
   } catch (err) {
     console.error(err);
@@ -71,6 +76,9 @@ export const getEditVideo = async (req, res) => {
 
   try {
     const video = await Video.findOne({ _id: id });
+    if (video.creator.toString() !== req.user.id) {
+      throw Error();
+    }
     res.render("editVideo", { pageTitle: `Edit ${video.title}`, video });
   } catch (err) {
     res.redirect(routes.home);
@@ -98,6 +106,10 @@ export const deleteVideo = async (req, res) => {
   } = req;
 
   try {
+    const video = await Video.findOne({ _id: id });
+    if (video.creator !== req.user.id) {
+      throw Error();
+    }
     await Video.findOneAndRemove({ _id: id });
   } catch (err) {
     console.log(err);

@@ -112,8 +112,13 @@ export const logout = (req, res) => {
 
 export const users = (req, res) => res.send("Users");
 
-export const getMe = (req, res) => {
-  res.render("userDetail", { pageTitle: "User Detail", user: req.user });
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate("videos");
+    res.render("userDetail", { pageTitle: "User Detail", user });
+  } catch (error) {
+    res.redirect(routes.home);
+  }
 };
 
 export const userDetail = async (req, res) => {
@@ -121,7 +126,7 @@ export const userDetail = async (req, res) => {
     params: { id }
   } = req;
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(id).populate("videos");
     res.render("userDetail", { pageTitle: "User Detail", user });
   } catch (err) {
     res.redirect(routes.home);
@@ -143,12 +148,35 @@ export const postEditProfile = async (req, res) => {
       avatarUrl: file ? file.path : req.user.avatarUrl
     });
   } catch (err) {
-    res.render("editProfile", { pageTitle: "Edit Profile" });
+    res.redirect(routes.editProfile);
   }
 
   res.redirect("/");
 };
 
-export const changePassword = (req, res) => {
+export const getChangePassword = (req, res) => {
   res.render("changePassword", { pageTitle: "Change Password" });
+};
+export const postChangePassword = async (req, res) => {
+  const {
+    body: { oldPassword, newPassword, newPassword1 }
+  } = req;
+
+  try {
+    if (newPassword !== newPassword1) {
+      res.status(400);
+      res.redirect(`/users${routes.changePassword}`);
+      return;
+    }
+
+    // passport가 req에 현재 세션을 통해 쿠키에서 가지고있는 정보를 해독하여 user를 넣어줌, 그 user는 User객체를 통해 찾은 유저와 일치
+    // 결국 req.user와 User.findOne({ _id: req.user.id })와 같은 값을 가진다. 결국 instance함수 changePassword를 사용할 수 있다.
+    // const user = await User.findOne({ _id: req.user.id });
+    // console.log(req.user, user, user.changePassword);
+    await req.user.changePassword(oldPassword, newPassword);
+    res.redirect(routes.me);
+  } catch (err) {
+    res.status(400);
+    res.redirect(`/users${routes.changePassword}`);
+  }
 };
