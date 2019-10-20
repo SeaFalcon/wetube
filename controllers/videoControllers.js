@@ -1,6 +1,8 @@
 // import { videos } from "../db";
 import routes from "../routes";
 import Video from "../models/Video";
+import User from "../models/User";
+import Comment from "../models/Comment";
 
 // async 해주는 이유, DB를 훑어보는 동안 페이지가 이미 로딩되는 상황 방지
 // await 키워드는 async없이 사용 불가
@@ -61,7 +63,9 @@ export const videoDetail = async (req, res) => {
   try {
     // populate 함수는 스키마 속성이 ObjectId인 경우에만 사용 가능
     // 원래 videos는 creator의 id 값만을 가지고 있으나, populate 함수를 사용하면 해당 필드에 유저 객체를 넣어준다.
-    const video = await Video.findOne({ _id: id }).populate("creator");
+    const video = await Video.findOne({ _id: id })
+      .populate("creator")
+      .populate("comments");
     res.render("videoDetail", { pageTitle: video.title, video });
   } catch (err) {
     console.error(err);
@@ -115,4 +119,62 @@ export const deleteVideo = async (req, res) => {
     console.log(err);
   }
   res.redirect(routes.home);
+};
+
+// api (only server connect)
+export const registerView = async (req, res) => {
+  const {
+    params: { id }
+  } = req;
+  try {
+    const video = await Video.findById(id);
+    video.views += 1;
+    video.save();
+    res.status(200);
+  } catch (err) {
+    res.status(400);
+  } finally {
+    res.end();
+  }
+};
+
+export const postAddComment = async (req, res) => {
+  const {
+    params: { id },
+    body: { comment },
+    user
+  } = req;
+  try {
+    const video = await Video.findById(id);
+    const userModel = await User.findById(user.id);
+    const newComment = await Comment.create({
+      text: comment,
+      creator: user.id
+    });
+    video.comments.push(newComment.id);
+    video.save();
+    userModel.comments.push(newComment.id);
+    userModel.save();
+  } catch (err) {
+    res.status(400);
+  } finally {
+    res.end();
+  }
+};
+
+export const postDeleteComment = async (req, res) => {
+  const {
+    params: { id }
+  } = req;
+  try {
+    // const video = await Video.findById(id);
+    // const willBeDeletedComment = await Comment.findById(id);
+    // video.comments.push(newComment.id);
+    // video.save();
+    await Comment.findOneAndDelete(id);
+  } catch (err) {
+    res.status(400);
+  } finally {
+    res.end();
+  }
 };

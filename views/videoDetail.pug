@@ -9,7 +9,7 @@ block content
       src:video.fileUrl
     })
     .video__info
-      if video.creator.id === loggedUser.id
+      if loggedUser && video.creator.id === loggedUser.id
         a(href=routes.editVideo(video.id)) 
           button Edit Video
       h5.video__title=video.title
@@ -24,6 +24,21 @@ block content
         a(href=routes.userDetail(video.creator.id))=video.creator.name
     .video__comments
       if video.comments.length === 1
-        span.video__coment-number 1 comments
+        span.video__coment-number
+          span#jsCommentNumber 1 
+          |  comments
       else
-        span.video__coment-number 
+        span.video__coment-number
+          span#jsCommentNumber= video.comments.length 
+          |  comments
+      if loggedUser
+        form.add__comment#jsAddComment
+          input(type="text", placeholder="Add a comment")
+      ul.video__comments-list#jsCommentList
+        each comment in video.comments.reverse()
+          li.cmtList
+            if comment.creator.toString() === loggedUser.id
+              span= comment.text
+              span.deleteBtn(id=`${comment.id}`) X
+            else
+              span= comment.text

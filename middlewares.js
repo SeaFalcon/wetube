@@ -9,7 +9,7 @@ export const localsMiddleware = (req, res, next) => {
   res.locals.routes = routes;
   // passport는 user가 담긴 object를 req에도 전달
   res.locals.loggedUser = req.user || null;
-  console.log(req.user);
+  // console.log(req.user);
   next();
 };
 
