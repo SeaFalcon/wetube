@@ -12,5 +12,9 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: "module"
   },
-  rules: { "no-console": "off", "no-restricted-globals": ["off"] }
+  rules: {
+    "no-console": "off",
+    "no-restricted-globals": ["off"],
+    "no-use-before-define": "off"
+  }
 };

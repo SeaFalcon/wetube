@@ -140,21 +140,22 @@ export const registerView = async (req, res) => {
 
 export const postAddComment = async (req, res) => {
   const {
-    params: { id },
+    params: { id: videoId },
     body: { comment },
-    user
+    user: { id: userId }
   } = req;
   try {
-    const video = await Video.findById(id);
-    const userModel = await User.findById(user.id);
+    const video = await Video.findById(videoId);
+    const userModel = await User.findById(userId);
     const newComment = await Comment.create({
       text: comment,
-      creator: user.id
+      creator: userId
     });
     video.comments.push(newComment.id);
     video.save();
     userModel.comments.push(newComment.id);
     userModel.save();
+    res.json({ status: 200, id: newComment.id });
   } catch (err) {
     res.status(400);
   } finally {
@@ -164,14 +165,31 @@ export const postAddComment = async (req, res) => {
 
 export const postDeleteComment = async (req, res) => {
   const {
-    params: { id }
+    params: { id: commentId },
+    body: { videoId }
   } = req;
   try {
-    // const video = await Video.findById(id);
-    // const willBeDeletedComment = await Comment.findById(id);
-    // video.comments.push(newComment.id);
-    // video.save();
-    await Comment.findOneAndDelete(id);
+    const comment = await Comment.findByIdAndDelete(commentId);
+
+    // method 1 - mongodb method
+    // const video = await Video.updateOne(
+    //   { _id: videoId },
+    //   { $pull: { comments: commentId } }
+    // );
+    // const user = await User.updateOne(
+    //   { _id: comment.creator },
+    //   { $pull: { comments: commentId } }
+    // );
+
+    // method 2 - javascript method
+    const video2 = await Video.findById(videoId);
+    video2.comments.splice(video2.comments.indexOf(commentId), 1);
+    video2.save();
+    const user2 = await User.findById(comment.creator);
+    user2.comments.splice(user2.comments.indexOf(commentId), 1);
+    user2.save();
+
+    //
   } catch (err) {
     res.status(400);
   } finally {
